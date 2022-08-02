@@ -102,8 +102,126 @@ const login = async (req, res) => {
   }
 }
 
+const getById = async (req, res) => {
+  try {
+    let { id } = req.params;
+
+    //garante que o id só vai ter NUMEROS;
+    id = id.replace(/\D/g, '');
+    if (!id) {
+      return res.status(200).send({
+        message: 'Please enter a valid id for query'
+      });
+    }
+
+    let user = await User.findOne({
+      where: {
+        id
+      }
+    });
+
+    if (!user) {
+      return res.status(200).send({
+        message: `No user found with the id ${id}`
+      });
+    }
+
+    return res.status(200).send(user);
+  } catch (error) {
+    return res.status(200).send({
+      message: error.message
+    })
+  }
+}
+
+const persist = async (req, res) => {
+  try {
+    let { id } = req.params;
+    //caso nao tenha id, cria um novo registro
+    if (!id) {
+      return await create(req.body, res)
+    }
+
+    return await update(id, req.body, res)
+  } catch (error) {
+    return res.status(200).send({
+      message: error.message
+    })
+  }
+}
+
+const create = async (dados, res) => {
+  let { username, name, phone, passwordHash, role } = dados;
+
+  let userCreate = await User.create({
+    username, 
+    name, 
+    phone, 
+    passwordHash, 
+    role
+  });
+  return res.status(201).send(userCreate)
+}
+
+const update = async (id, dados, res) => {
+  let { username, name, phone, passwordHash, role } = dados;
+  let user = await User.findOne({
+    where: {
+      id
+    }
+  });
+
+  if (!user) {
+    return res.status(200).send({ type: 'error', message: `No user found with the id ${id}` })
+  }
+
+  //update dos campos
+  Object.keys(dados).forEach(field => user[field] = dados[field]); 
+
+  await user.save();
+  return res.status(200).send({
+    message: `User ${id} successfully updated`,
+    data: user
+  });
+}
+
+const destroy = async (req, res) => {
+  try {
+    let { id } = req.body;
+    //garante que o id só vai ter NUMEROS;
+    id = id ? id.toString().replace(/\D/g, '') : null;
+    if (!id) {
+      return res.status(200).send({
+        message: 'Enter a valid id to delete an user'
+      });
+    }
+
+    let user = await User.findOne({
+      where: {
+        id
+      }
+    });
+
+    if (!user) {
+      return res.status(200).send({ message: `User with the id ${id} not found` })
+    }
+
+    await user.destroy();
+    return res.status(200).send({
+      message: `User id ${id} successfully deleted`
+    })
+  } catch (error) {
+    return res.status(200).send({
+      message: error.message
+    })
+  }
+}
+
 export default {
   getAll,
   register,
-  login
+  login,
+  getById,
+  persist,
+  destroy
 }

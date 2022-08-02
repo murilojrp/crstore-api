@@ -2,12 +2,12 @@
 //responsavel por executar o que tiver que ser executado
 //as funcoes de lidar com o banco de dados
 //os cruds - GetAll, GetById, Persistir, Delete
-import Item from "../models/Item";
+import OrderItem from "../models/OrderItem";
 
 const getAll = async (req, res) => {
   try {
-    const items = await Item.findAll();
-    return res.status(200).send(items);
+    const order_items = await OrderItem.findAll();
+    return res.status(200).send(order_items);
   } catch (error) {
     return res.status(200).send({
       message: error.message
@@ -27,19 +27,19 @@ const getById = async (req, res) => {
       });
     }
 
-    let item = await Item.findOne({
+    let order_item = await OrderItem.findOne({
       where: {
         id
       }
     });
 
-    if (!item) {
+    if (!order_item) {
       return res.status(200).send({
-        message: `No item found with the id ${id}`
+        message: `No order_item found with the id ${id}`
       });
     }
 
-    return res.status(200).send(item);
+    return res.status(200).send(order_item);
   } catch (error) {
     return res.status(200).send({
       message: error.message
@@ -64,34 +64,36 @@ const persist = async (req, res) => {
 }
 
 const create = async (dados, res) => {
-  let { name, price } = dados;
+  let { price, amount, idItem, idOrder } = dados;
 
-  let item = await Item.create({
-    name, 
-    price
+  let order_item = await OrderItem.create({
+    price, 
+    amount, 
+    idItem, 
+    idOrder
   });
-  return res.status(201).send(item)
+  return res.status(201).send(order_item)
 }
 
 const update = async (id, dados, res) => {
-  let { name, price } = dados;
-  let item = await Item.findOne({
+  let { price, amount, idItem, idOrder } = dados;
+  let order_item = await OrderItem.findOne({
     where: {
       id
     }
   });
 
-  if (!item) {
-    return res.status(200).send({ type: 'error', message: `No item found with the id ${id}` })
+  if (!order_item) {
+    return res.status(200).send({ type: 'error', message: `No order_item found with the id ${id}` })
   }
 
   //update dos campos
-  Object.keys(dados).forEach(field => item[field] = dados[field]); 
+  Object.keys(dados).forEach(field => order_item[field] = dados[field]); 
 
-  await item.save();
+  await order_item.save();
   return res.status(200).send({
-    message: `Item ${id} successfully updated`,
-    data: item
+    message: `Order_item ${id} successfully updated`,
+    data: order_item
   });
 }
 
@@ -102,23 +104,23 @@ const destroy = async (req, res) => {
     id = id ? id.toString().replace(/\D/g, '') : null;
     if (!id) {
       return res.status(200).send({
-        message: 'Enter a valid id to delete an item'
+        message: 'Enter a valid id to delete an order_item'
       });
     }
 
-    let item = await Item.findOne({
+    let order_item = await OrderItem.findOne({
       where: {
         id
       }
     });
 
-    if (!item) {
-      return res.status(200).send({ message: `Item with the id ${id} not found` })
+    if (!order_item) {
+      return res.status(200).send({ message: `Order_item with the id ${id} not found` })
     }
 
-    await item.destroy();
+    await order_item.destroy();
     return res.status(200).send({
-      message: `Item id ${id} successfully deleted`
+      message: `Order_item id ${id} successfully deleted`
     })
   } catch (error) {
     return res.status(200).send({

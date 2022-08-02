@@ -9,7 +9,7 @@ const Payment = sequelize.define(
       primaryKey: true,
       autoIncrement: true
     },
-    way: {
+    method: {
         type: DataTypes.STRING(100),
         allowNull: false
     }

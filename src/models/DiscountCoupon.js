@@ -14,7 +14,7 @@ const DiscountCoupon = sequelize.define(
         allowNull: false
     },
     discount: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.NUMERIC(15,2),
         allowNull: false
     }
   },

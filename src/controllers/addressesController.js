@@ -9,7 +9,7 @@ const getAll = async (req, res) => {
     const addresses = await Address.findAll();
     return res.status(200).send(addresses);
   } catch (error) {
-    return res.status(500).send({
+    return res.status(200).send({
       message: error.message
     })
   }
@@ -22,7 +22,7 @@ const getById = async (req, res) => {
     //garante que o id só vai ter NUMEROS;
     id = id.replace(/\D/g, '');
     if (!id) {
-      return res.status(400).send({
+      return res.status(200).send({
         message: 'Please enter a valid id for query'
       });
     }
@@ -34,14 +34,14 @@ const getById = async (req, res) => {
     });
 
     if (!address) {
-      return res.status(400).send({
+      return res.status(200).send({
         message: `No address found with the id ${id}`
       });
     }
 
     return res.status(200).send(address);
   } catch (error) {
-    return res.status(500).send({
+    return res.status(200).send({
       message: error.message
     })
   }
@@ -57,7 +57,7 @@ const persist = async (req, res) => {
 
     return await update(id, req.body, res)
   } catch (error) {
-    return res.status(500).send({
+    return res.status(200).send({
       message: error.message
     })
   }
@@ -85,7 +85,7 @@ const update = async (id, dados, res) => {
   });
 
   if (!addressUpdate) {
-    return res.status(400).send({ type: 'error', message: `No address found with the id ${id}` })
+    return res.status(200).send({ type: 'error', message: `No address found with the id ${id}` })
   }
 
   //update dos campos
@@ -104,7 +104,7 @@ const destroy = async (req, res) => {
     //garante que o id só vai ter NUMEROS;
     id = id ? id.toString().replace(/\D/g, '') : null;
     if (!id) {
-      return res.status(400).send({
+      return res.status(200).send({
         message: 'Enter a valid id to delete an address'
       });
     }
@@ -116,7 +116,7 @@ const destroy = async (req, res) => {
     });
 
     if (!address) {
-      return res.status(400).send({ message: `Address with the id ${id} not found` })
+      return res.status(200).send({ message: `Address with the id ${id} not found` })
     }
 
     await address.destroy();
@@ -124,7 +124,7 @@ const destroy = async (req, res) => {
       message: `Address id ${id} successfully deleted`
     })
   } catch (error) {
-    return res.status(500).send({
+    return res.status(200).send({
       message: error.message
     })
   }

@@ -4,6 +4,8 @@ import Category from "./Category";
 import Payment from "./Payment";
 import DiscountCoupon from "./DiscountCoupon";
 import Address from "./Address";
+import Order from "./Order";
+import OrderItem from "./OrderItem";
 
 (async () => {
   // await User.sync({ force: true })
@@ -12,4 +14,6 @@ import Address from "./Address";
   // await Payment.sync({ force: true})
   // await DiscountCoupon.sync({ force: true})
   // await Address.sync({ force: true})
+  // await Order.sync({ force: true})
+  // await OrderItem.sync({ force: true})
 })();

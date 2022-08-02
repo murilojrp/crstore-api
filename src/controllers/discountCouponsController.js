@@ -9,7 +9,7 @@ const getAll = async (req, res) => {
     const discount_coupons = await DiscountCoupon.findAll();
     return res.status(200).send(discount_coupons);
   } catch (error) {
-    return res.status(500).send({
+    return res.status(200).send({
       message: error.message
     })
   }
@@ -22,7 +22,7 @@ const getById = async (req, res) => {
     //garante que o id só vai ter NUMEROS;
     id = id.replace(/\D/g, '');
     if (!id) {
-      return res.status(400).send({
+      return res.status(200).send({
         message: 'Please enter a valid id for query'
       });
     }
@@ -34,14 +34,14 @@ const getById = async (req, res) => {
     });
 
     if (!discount_coupon) {
-      return res.status(400).send({
+      return res.status(200).send({
         message: `No discount coupon found with the id ${id}`
       });
     }
 
     return res.status(200).send(discount_coupon);
   } catch (error) {
-    return res.status(500).send({
+    return res.status(200).send({
       message: error.message
     })
   }
@@ -57,7 +57,7 @@ const persist = async (req, res) => {
 
     return await update(id, req.body, res)
   } catch (error) {
-    return res.status(500).send({
+    return res.status(200).send({
       message: error.message
     })
   }
@@ -82,7 +82,7 @@ const update = async (id, dados, res) => {
   });
 
   if (!discountCoupon) {
-    return res.status(400).send({ type: 'error', message: `No discount coupon found with the id ${id}` })
+    return res.status(200).send({ type: 'error', message: `No discount coupon found with the id ${id}` })
   }
 
   //update dos campos
@@ -101,7 +101,7 @@ const destroy = async (req, res) => {
     //garante que o id só vai ter NUMEROS;
     id = id ? id.toString().replace(/\D/g, '') : null;
     if (!id) {
-      return res.status(400).send({
+      return res.status(200).send({
         message: 'Enter a valid id to delete a discount coupon'
       });
     }
@@ -113,7 +113,7 @@ const destroy = async (req, res) => {
     });
 
     if (!discountCoupon) {
-      return res.status(400).send({ message: `Discount coupon with the id ${id} not found` })
+      return res.status(200).send({ message: `Discount coupon with the id ${id} not found` })
     }
 
     await discountCoupon.destroy();
@@ -121,7 +121,7 @@ const destroy = async (req, res) => {
       message: `Discount coupon id ${id} successfully deleted`
     })
   } catch (error) {
-    return res.status(500).send({
+    return res.status(200).send({
       message: error.message
     })
   }
