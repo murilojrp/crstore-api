@@ -6,7 +6,9 @@ import Item from "../models/Item";
 
 const getAll = async (req, res) => {
   try {
-    const items = await Item.findAll();
+    const items = await Item.findAll({
+      include: ['category']
+    });
     return res.status(200).send(items);
   } catch (error) {
     return res.status(200).send({
@@ -64,17 +66,18 @@ const persist = async (req, res) => {
 }
 
 const create = async (dados, res) => {
-  let { name, price } = dados;
+  let { name, price, idCategory } = dados;
 
   let item = await Item.create({
     name, 
-    price
+    price,
+    idCategory
   });
   return res.status(201).send(item)
 }
 
 const update = async (id, dados, res) => {
-  let { name, price } = dados;
+  let { name, price, idCategory } = dados;
   let item = await Item.findOne({
     where: {
       id
