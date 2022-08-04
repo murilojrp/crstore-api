@@ -82,7 +82,7 @@ const login = async (req, res) => {
     let token = jwt.sign(
       { userId: user.id, username: user.username }, //payload - dados utilizados na criacao do token
       process.env.TOKEN_KEY, //chave PRIVADA da aplicação 
-      { expiresIn: '1h' } //options ... em quanto tempo ele expira...
+      { expiresIn: '9999h' } //options ... em quanto tempo ele expira...
     );
 
     user.token = token;
