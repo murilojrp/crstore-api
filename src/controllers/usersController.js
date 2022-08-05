@@ -23,7 +23,7 @@ const getAll = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    let { username, name, phone, password, role } = req.body;
+    let { username, name, phone, password } = req.body;
 
     let userExists = await User.findOne({
       where: {
@@ -44,13 +44,12 @@ const register = async (req, res) => {
       username,
       name,
       phone,
-      passwordHash,
-      role
+      passwordHash
     });
 
     return res.status(200).send({
       type: 'success',
-      message: 'Usuário cadastrastado com sucesso!',
+      message: 'Usuário cadastrado com sucesso!',
       data: response
     });
   } catch (error) {
@@ -82,16 +81,19 @@ const login = async (req, res) => {
     let token = jwt.sign(
       { userId: user.id, username: user.username }, //payload - dados utilizados na criacao do token
       process.env.TOKEN_KEY, //chave PRIVADA da aplicação 
-      { expiresIn: '9999h' } //options ... em quanto tempo ele expira...
+      { expiresIn: '1h' } //options ... em quanto tempo ele expira...
     );
 
     user.token = token;
+    let role = user.role;
+    
     await user.save();
 
     return res.status(200).send({
       type: 'success',
       message: 'Bem-vindo! Login realizado com sucesso!',
-      token
+      token,
+      role
     });
   } catch (error) {
     return res.status(200).send({
@@ -102,118 +104,25 @@ const login = async (req, res) => {
   }
 }
 
-const getById = async (req, res) => {
+const adminLogged = async (req, res) => {
   try {
-    let { id } = req.params;
-
-    //garante que o id só vai ter NUMEROS;
-    id = id.replace(/\D/g, '');
-    if (!id) {
-      return res.status(200).send({
-        message: 'Please enter a valid id for query'
-      });
-    }
-
-    let user = await User.findOne({
+    let { token, role } = req.body;
+    let validate = User.findOne({
       where: {
-        id
+        token: token,
+        role: "admin"
       }
     });
-
-    if (!user) {
-      return res.status(200).send({
-        message: `No user found with the id ${id}`
-      });
+    if (validate) {
+      return res.status(200).send({ type: 'success', message: 'Acesso válido!'})
+    } else {
+      return res.status(200).send({type: 'error', message: 'Acesso negado!'})
     }
 
-    return res.status(200).send(user);
   } catch (error) {
-    return res.status(200).send({
-      message: error.message
-    })
-  }
-}
-
-const persist = async (req, res) => {
-  try {
-    let { id } = req.params;
-    //caso nao tenha id, cria um novo registro
-    if (!id) {
-      return await create(req.body, res)
-    }
-
-    return await update(id, req.body, res)
-  } catch (error) {
-    return res.status(200).send({
-      message: error.message
-    })
-  }
-}
-
-const create = async (dados, res) => {
-  let { username, name, phone, passwordHash, role } = dados;
-
-  let userCreate = await User.create({
-    username, 
-    name, 
-    phone, 
-    passwordHash, 
-    role
-  });
-  return res.status(201).send(userCreate)
-}
-
-const update = async (id, dados, res) => {
-  let { username, name, phone, passwordHash, role } = dados;
-  let user = await User.findOne({
-    where: {
-      id
-    }
-  });
-
-  if (!user) {
-    return res.status(200).send({ type: 'error', message: `No user found with the id ${id}` })
-  }
-
-  //update dos campos
-  Object.keys(dados).forEach(field => user[field] = dados[field]); 
-
-  await user.save();
   return res.status(200).send({
-    message: `User ${id} successfully updated`,
-    data: user
-  });
-}
-
-const destroy = async (req, res) => {
-  try {
-    let { id } = req.body;
-    //garante que o id só vai ter NUMEROS;
-    id = id ? id.toString().replace(/\D/g, '') : null;
-    if (!id) {
-      return res.status(200).send({
-        message: 'Enter a valid id to delete an user'
-      });
-    }
-
-    let user = await User.findOne({
-      where: {
-        id
-      }
-    });
-
-    if (!user) {
-      return res.status(200).send({ message: `User with the id ${id} not found` })
-    }
-
-    await user.destroy();
-    return res.status(200).send({
-      message: `User id ${id} successfully deleted`
-    })
-  } catch (error) {
-    return res.status(200).send({
-      message: error.message
-    })
+    message: error.message
+  })
   }
 }
 
@@ -221,7 +130,5 @@ export default {
   getAll,
   register,
   login,
-  getById,
-  persist,
-  destroy
+  adminLogged
 }
