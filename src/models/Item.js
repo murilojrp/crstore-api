@@ -17,6 +17,10 @@ const Item = sequelize.define(
     price: {
       type: DataTypes.NUMERIC(15,2),
       allowNull: false
+    },
+    image: {
+      type: DataTypes.TEXT,
+      allowNull: false
     }
   },
   {

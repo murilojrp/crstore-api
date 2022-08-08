@@ -66,18 +66,19 @@ const persist = async (req, res) => {
 }
 
 const create = async (dados, res) => {
-  let { name, price, idCategory } = dados;
+  let { name, price, idCategory, image } = dados;
 
   let item = await Item.create({
     name, 
     price,
-    idCategory
+    idCategory,
+    image
   });
   return res.status(201).send(item)
 }
 
 const update = async (id, dados, res) => {
-  let { name, price, idCategory } = dados;
+  let { name, price, idCategory, image } = dados;
   let item = await Item.findOne({
     where: {
       id

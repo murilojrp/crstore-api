@@ -106,11 +106,11 @@ const login = async (req, res) => {
 
 const adminLogged = async (req, res) => {
   try {
-    let { token, role } = req.body;
+    let { token } = req.body;
     let validate = User.findOne({
       where: {
-        token: token,
-        role: "admin"
+        role: "admin",
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiTXVyaWdvbCIsImlhdCI6MTY1OTk3NzU2OSwiZXhwIjoxNjU5OTgxMTY5fQ.wNs3yHViFXK4FlJBXvun9H6oY2yDVd4J6KltQ-yu0zA"
       }
     });
     if (validate) {
