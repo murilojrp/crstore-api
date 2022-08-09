@@ -3,6 +3,9 @@
 //as funcoes de lidar com o banco de dados
 //os cruds - GetAll, GetById, Persistir, Delete
 import Address from "../models/Address";
+import User from "../models/User";
+import jwt from "jsonwebtoken";
+
 
 const getAll = async (req, res) => {
   try {
@@ -47,6 +50,42 @@ const getById = async (req, res) => {
   }
 }
 
+const getAddressesOfUser = async (req, res) => {
+  try {
+    let token = req.headers.authorization;
+    
+    console.log(token)
+
+    token = token.split(' ')[1] || null;
+
+    console.log(token)
+    let decodedToken = jwt.decode(token);
+    console.log(decodedToken)
+    let address = await Address.findAll({
+      where: {
+        idUser: decodedToken.userId
+      }
+    })
+    console.log(address)
+    if (!address) {
+      return res.status(200).send({
+        type: 'success',
+        message: 'Deu Boa, porém o usuário não tem endereços'
+      })
+    }
+
+    return res.status(200).send({
+      type: 'success',
+      message: 'Deu Boa',
+      data: address
+    });
+  } catch (error) {
+    return res.status(200).send({
+      message: error.message
+    })
+  }
+}
+
 const persist = async (req, res) => {
   try {
     let { id } = req.params;
@@ -64,20 +103,21 @@ const persist = async (req, res) => {
 }
 
 const create = async (dados, res) => {
-  let { street, neighborhood, number, complement, address } = dados;
+  let { street, neighborhood, number, complement, address, idUser } = dados;
 
   let addressCreate = await Address.create({
     street, 
     neighborhood, 
     number, 
     complement, 
-    address
+    address,
+    idUser
   });
   return res.status(201).send(addressCreate)
 }
 
 const update = async (id, dados, res) => {
-  let { street, neighborhood, number, complement, address } = dados;
+  let { street, neighborhood, number, complement, address, idUser } = dados;
   let addressUpdate = await Address.findOne({
     where: {
       id
@@ -134,5 +174,6 @@ export default {
   getAll,
   getById,
   persist,
-  destroy
+  destroy,
+  getAddressesOfUser
 }; 

@@ -21,6 +21,31 @@ const getAll = async (req, res) => {
   }
 }
 
+const getUserByToken = async (authorization) => {
+  if (!authorization) {
+    return null;
+  }
+
+  const token = authorization.split(' ')[1] || null;
+  const decodedToken = jwt.decode(token);
+  
+  if (!decodedToken) {
+    return null;
+  }
+
+  let user = await User.findOne({
+    where: {
+      id: decodedToken.userId
+    }
+  })
+
+  if (!user) {
+    return null;
+  }
+
+  return user;
+}
+
 const register = async (req, res) => {
   try {
     let { username, name, phone, password } = req.body;
@@ -130,5 +155,6 @@ export default {
   getAll,
   register,
   login,
-  adminLogged
+  adminLogged,
+  getUserByToken
 }
