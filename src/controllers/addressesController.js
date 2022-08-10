@@ -3,18 +3,54 @@
 //as funcoes de lidar com o banco de dados
 //os cruds - GetAll, GetById, Persistir, Delete
 import Address from "../models/Address";
-import User from "../models/User";
-import jwt from "jsonwebtoken";
+import usersController from "./usersController"
 
 
-const getAll = async (req, res) => {
+
+const get = async (req, res) => {
   try {
-    const addresses = await Address.findAll();
-    return res.status(200).send(addresses);
+    let id = req.params.id ? req.params.id.toString().replace(/\D/g, '') : null;
+
+    let user = await usersController.getUserByToken(req.headers.authorization);
+
+    if (!user) {
+      return res.status(200).send({
+        type: 'error',
+        message: 'Ocorreu um erro ao recuperar os seus dados'
+      })
+    }
+
+    if (!id) {
+      let response = await Address.findAll({ where: { idUser: user.id } });
+
+      return res.status(200).send({
+        type: 'success',
+        message: 'Registros carregados com sucesso',
+        data: response 
+      });
+    };
+
+    let response = await Address.findOne({ where: { id, idUser: user.id } });
+
+    if (!response) {
+      return res.status(200).send({
+        type: 'error',
+        message: `Nenhum registro com id ${id}`,
+        data: [] 
+      });
+    }
+
+    return res.status(200).send({
+      type: 'success',
+      message: 'Registro carregado com sucesso',
+      data: response 
+    });
   } catch (error) {
     return res.status(200).send({
-      message: error.message
-    })
+      type: 'error',
+      message: `Ops! Ocorreu um erro`,
+      error: error.message 
+    });
   }
 }
 
@@ -50,130 +86,118 @@ const getById = async (req, res) => {
   }
 }
 
-const getAddressesOfUser = async (req, res) => {
-  try {
-    let token = req.headers.authorization;
-    
-    console.log(token)
-
-    token = token.split(' ')[1] || null;
-
-    console.log(token)
-    let decodedToken = jwt.decode(token);
-    console.log(decodedToken)
-    let address = await Address.findAll({
-      where: {
-        idUser: decodedToken.userId
-      }
-    })
-    console.log(address)
-    if (!address) {
-      return res.status(200).send({
-        type: 'success',
-        message: 'Deu Boa, porém o usuário não tem endereços'
-      })
-    }
-
-    return res.status(200).send({
-      type: 'success',
-      message: 'Deu Boa',
-      data: address
-    });
-  } catch (error) {
-    return res.status(200).send({
-      message: error.message
-    })
-  }
-}
-
 const persist = async (req, res) => {
-  try {
-    let { id } = req.params;
-    //caso nao tenha id, cria um novo registro
-    if (!id) {
-      return await create(req.body, res)
-    }
-
-    return await update(id, req.body, res)
-  } catch (error) {
+  let id = req.params.id ? req.params.id.toString().replace(/\D/g, '') : null;
+  let user = await usersController.getUserByToken(req.headers.authorization);
+  if (!JSON.stringify(user)) {
     return res.status(200).send({
-      message: error.message
+      type: 'error',
+      message: 'Ocorreu um erro ao recuperar os seus dados'
     })
   }
-}
-
-const create = async (dados, res) => {
-  let { street, neighborhood, number, complement, address, idUser } = dados;
-
-  let addressCreate = await Address.create({
-    street, 
-    neighborhood, 
-    number, 
-    complement, 
-    address,
-    idUser
-  });
-  return res.status(201).send(addressCreate)
-}
-
-const update = async (id, dados, res) => {
-  let { street, neighborhood, number, complement, address, idUser } = dados;
-  let addressUpdate = await Address.findOne({
-    where: {
-      id
+  
+  try {
+    if (!id) {
+      return await create(req.body, res, user)
     }
+    return await update(id, req.body, res, user)
+  } catch (error) {
+    return res.status(200).send({
+      type: 'error',
+      message: `Ops! Ocorreu um erro`,
+      error: error
+    });
+  }
+}
+
+const create = async (dados, res, user) => {
+  let { address, street, neighborhood, number, complement} = dados;
+  let response = await Address.create({
+    idUser: user.id,
+    address,
+    street,
+    neighborhood,
+    number,
+    complement
   });
 
-  if (!addressUpdate) {
-    return res.status(200).send({ type: 'error', message: `No address found with the id ${id}` })
+  return res.status(200).send({
+    type: 'success',
+    message: `Cadastro realizado com sucesso`,
+    data: response 
+  });
+}
+
+const update = async (id, dados, res, user) => {
+  let response = await Address.findOne({ where: { id, idUser: user.id } });
+
+  if (!response) {
+    return res.status(200).send({
+      type: 'error',
+      message: `Nenhum registro com id ${id} para atualizar`,
+      data: [] 
+    });
   }
 
-  //update dos campos
-  Object.keys(dados).forEach(field => address[field] = dados[field]); 
+  Object.keys(dados).forEach(field => response[field] = dados[field]);
 
-  await address.save();
+  await response.save();
   return res.status(200).send({
-    message: `Address ${id} successfully updated`,
-    data: address
+    type: 'sucess',
+    message: `Registro id ${id} atualizado com sucesso`,
+    data: response
   });
 }
 
 const destroy = async (req, res) => {
   try {
-    let { id } = req.body;
-    //garante que o id só vai ter NUMEROS;
-    id = id ? id.toString().replace(/\D/g, '') : null;
+    let id = req.body.id ? req.body.id.toString().replace(/\D/g, '') : null;
+
+    let user = await usersController.getUserByToken(req.headers.authorization);
+
+    if (!user) {
+      return res.status(200).send({
+        type: 'error',
+        message: 'Ocorreu um erro ao recuperar os seus dados'
+      })
+    }
+
     if (!id) {
       return res.status(200).send({
-        message: 'Enter a valid id to delete an address'
+        type: 'error',
+        message: `Informe um id para deletar o registro`,
+        data: [] 
       });
     }
 
-    let address = await Address.findOne({
-      where: {
-        id
-      }
-    });
+    let response = await Address.findOne({ where: { id, idUser: user.id } });
 
-    if (!address) {
-      return res.status(200).send({ message: `Address with the id ${id} not found` })
+    if (!response) {
+      return res.status(200).send({
+        type: 'error',
+        message: `Nenhum registro com id ${id} para deletar`,
+        data: [] 
+      });
     }
 
-    await address.destroy();
+    await response.destroy();
     return res.status(200).send({
-      message: `Address id ${id} successfully deleted`
-    })
+      type: 'success',
+      message: `Registro id ${id} deletado com sucesso`,
+      data: [] 
+    });
   } catch (error) {
     return res.status(200).send({
-      message: error.message
-    })
+      type: 'error',
+      message: `Ops! Ocorreu um erro`,
+      error: error.message 
+    });
   }
 }
 
 export default {
-  getAll,
   getById,
+  get,
   persist,
-  destroy,
-  getAddressesOfUser
+  destroy
 }; 

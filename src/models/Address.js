@@ -3,7 +3,7 @@ import { sequelize } from "../config";
 import User from "./User";
 
 const Address = sequelize.define(
-  'adresses',
+  'addresses',
   {
     id: {
       type: DataTypes.INTEGER,

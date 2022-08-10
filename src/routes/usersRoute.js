@@ -5,5 +5,4 @@ export default (app) => {
 	app.get('/users', controller.getAll)
 	app.post('/users/register', controller.register)
 	app.post('/users/login', controller.login)
-	app.get('/users/getuserbytoken', controller.getUserByToken)
 }

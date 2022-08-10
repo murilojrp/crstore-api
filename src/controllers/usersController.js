@@ -23,26 +23,28 @@ const getAll = async (req, res) => {
 
 const getUserByToken = async (authorization) => {
   if (!authorization) {
+    console.log("sem authorization")
     return null;
   }
-
+  console.log(`authorization: ${authorization}`)
   const token = authorization.split(' ')[1] || null;
+  console.log(`token: ${token}`)
   const decodedToken = jwt.decode(token);
-  
+  console.log(`decodedtoken: ${JSON.stringify(decodedToken)}`)
   if (!decodedToken) {
     return null;
   }
-
+  console.log(`decodedtoken.iduser: ${decodedToken.userId}`)
   let user = await User.findOne({
     where: {
       id: decodedToken.userId
     }
   })
+  console.log(`user: ${user}`)
 
   if (!user) {
     return null;
   }
-
   return user;
 }
 
@@ -106,7 +108,7 @@ const login = async (req, res) => {
     let token = jwt.sign(
       { userId: user.id, username: user.username }, //payload - dados utilizados na criacao do token
       process.env.TOKEN_KEY, //chave PRIVADA da aplicação 
-      { expiresIn: '1h' } //options ... em quanto tempo ele expira...
+      { expiresIn: '999h' } //options ... em quanto tempo ele expira...
     );
 
     user.token = token;
