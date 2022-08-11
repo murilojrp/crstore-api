@@ -9,7 +9,11 @@ const getAll = async (req, res) => {
     const items = await Item.findAll({
       include: ['category']
     });
-    return res.status(200).send(items);
+    return res.status(200).send({
+      type: 'success',
+      message: 'Deu Boa',
+      data: items
+    });
   } catch (error) {
     return res.status(200).send({
       message: error.message

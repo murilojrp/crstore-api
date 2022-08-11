@@ -6,6 +6,7 @@ import discountCouponsRoute from "./discountCouponsRoute";
 import addressesRoute from "./addressesRoute";
 import ordersRoute from "./ordersRoute";
 import orderItemsRoute from "./orderItemsRoute";
+import cartsRoute from "./cartsRoute";
 
 function Routes(app) {
 	usersRoute(app);
@@ -16,6 +17,7 @@ function Routes(app) {
 	addressesRoute(app);
 	ordersRoute(app);
 	orderItemsRoute(app)
+	cartsRoute(app)
 }
 
 export default Routes;
