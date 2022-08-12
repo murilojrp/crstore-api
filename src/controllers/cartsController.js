@@ -19,7 +19,9 @@ const get = async (req, res) => {
     }
 
     if (!id) {
-      let response = await Cart.findAll({ where: { idUser: user.id } });
+      let response = await Cart.findAll({ include: ['item'], where: { idUser: user.id } });
+
+      
 
       return res.status(200).send({
         type: 'success',
@@ -93,6 +95,30 @@ const persist = async (req, res) => {
     })
   }
   
+  let idUser = JSON.stringify(user.id);
+
+  let { idItem, amount, price } = req.body;
+
+  let itemAlreadyOnCart = await Cart.findOne({
+    where: {
+      idUser,
+      idItem,
+      price,
+    }
+  })
+  
+  if (itemAlreadyOnCart) {
+    amount = Number(amount);
+    amount += Number(itemAlreadyOnCart.amount);
+    let updateOfTheItem = {
+      idItem,
+      amount,
+      price
+    }
+    return await update(itemAlreadyOnCart.id, updateOfTheItem, res, user)
+  }
+
+
   try {
     if (!id) {
       return await create(req.body, res, user)
